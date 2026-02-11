@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeonMarket | The Final Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --bg-body: #020617;
+            --bg-card: #0f172a;
+            --primary: #8b5cf6;
+            --secondary: #06b6d4;
+            --gemini-grad: linear-gradient(135deg, #4285f4, #9b72cb, #d96570);
+            --flash: #f43f5e;
+            --text-main: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border: rgba(255,255,255,0.08);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; scroll-behavior: smooth; }
+        body { background-color: var(--bg-body); color: var(--text-main); overflow-x: hidden; }
+        
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 5%; }
+
+        /* HEADER */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            background: rgba(2, 6, 23, 0.9); backdrop-filter: blur(15px);
+            border-bottom: 1px solid var(--border); padding: 15px 0;
+        }
+        .nav-content { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 800; background: var(--gemini-grad); -webkit-background-clip: text; color: transparent; cursor: pointer; }
+        .nav-links { display: flex; gap: 20px; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: 0.3s; font-weight: 600; text-transform: uppercase; }
+        
+        .auth-group { display: flex; align-items: center; gap: 12px; }
+        .btn-header-login { background: transparent; color: white; border: 1px solid var(--border); padding: 8px 16px; border-radius: 8px; cursor: pointer; }
+        .btn-header-signup { background: var(--gemini-grad); color: white; border: none; padding: 9px 18px; border-radius: 8px; cursor: pointer; font-weight: bold; }
+
+        /* MODALES (PANCARTAS FLOTANTES) */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(8px);
+            display: none; align-items: center; justify-content: center; z-index: 3000;
+        }
+        .modal-content {
+            background: var(--bg-card); width: 90%; max-width: 400px; padding: 40px;
+            border-radius: 24px; border: 1px solid var(--border); position: relative;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5); transform: translateY(-20px); transition: 0.3s;
+        }
+        .modal-content h2 { font-size: 2rem; margin-bottom: 10px; background: var(--gemini-grad); -webkit-background-clip: text; color: transparent; }
+        .modal-close { position: absolute; top: 20px; right: 20px; cursor: pointer; font-size: 1.2rem; color: var(--text-muted); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-muted); font-size: 0.9rem; }
+        .form-group input { width: 100%; background: #1e293b; border: 1px solid var(--border); padding: 12px; border-radius: 10px; color: white; outline: none; }
+        .btn-submit { width: 100%; padding: 14px; background: var(--gemini-grad); border: none; color: white; border-radius: 10px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+
+        /* HERO */
+        .hero {
+            height: 80vh; display: flex; align-items: center; justify-content: center; text-align: center;
+            background: radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.1), transparent 70%);
+        }
+        .hero h1 { font-size: clamp(2.5rem, 8vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+        .hero span { background: var(--gemini-grad); -webkit-background-clip: text; color: transparent; }
+
+        /* PRODUCTOS */
+        .section-header { display: flex; align-items: center; justify-content: space-between; margin: 80px 0 30px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .timer-box { background: var(--flash); color: white; padding: 6px 15px; border-radius: 6px; font-weight: bold; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; }
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 15px; overflow: hidden; transition: 0.3s; }
+        .card:hover { transform: translateY(-8px); border-color: var(--primary); }
+        .card-img { height: 220px; width: 100%; object-fit: cover; }
+        .card-body { padding: 20px; }
+        .card-price { font-size: 1.4rem; font-weight: bold; color: var(--secondary); margin: 10px 0; }
+        .old-price { font-size: 0.9rem; color: var(--text-muted); text-decoration: line-through; margin-right: 10px; }
+        .btn-add { width: 100%; padding: 12px; background: transparent; border: 1px solid var(--primary); color: white; border-radius: 8px; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .btn-add:hover { background: var(--primary); }
+
+        /* IA ASISTENTE */
+        .ai-fab {
+            position: fixed; bottom: 30px; right: 30px; width: 65px; height: 65px;
+            background: var(--gemini-grad); border-radius: 50%; display: flex; align-items: center; justify-content: center;
+            color: white; cursor: pointer; z-index: 1500; animation: pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(155, 114, 203, 0.7); } 70% { box-shadow: 0 0 0 15px rgba(155, 114, 203, 0); } 100% { box-shadow: 0 0 0 0 rgba(155, 114, 203, 0); } }
+
+        .chat-window {
+            position: fixed; bottom: 110px; right: 30px; width: 360px; height: 500px;
+            background: #1e293b; border-radius: 24px; border: 1px solid var(--border);
+            display: none; flex-direction: column; z-index: 1500; box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+        }
+        .chat-header { padding: 20px; background: #0f172a; display: flex; align-items: center; gap: 10px; font-weight: bold; border-radius: 24px 24px 0 0; }
+        .chat-msgs { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; }
+        .msg { padding: 12px; border-radius: 15px; font-size: 0.9rem; max-width: 85%; }
+        .bot { background: #334155; align-self: flex-start; }
+        .user { background: var(--gemini-grad); align-self: flex-end; }
+        .chat-input { padding: 15px; display: flex; gap: 10px; border-top: 1px solid var(--border); }
+        .chat-input input { flex: 1; background: #0f172a; border: 1px solid var(--border); padding: 10px; border-radius: 10px; color: white; outline: none; }
+
+        /* CARRITO */
+        .sidebar { position: fixed; top: 0; right: -450px; width: 400px; height: 100%; background: #0f172a; border-left: 1px solid var(--border); z-index: 2000; padding: 30px; transition: 0.4s; }
+        .sidebar.active { right: 0; }
+        .cart-item { display: flex; gap: 15px; margin-bottom: 15px; align-items: center; }
+        .cart-item img { width: 55px; height: 55px; object-fit: cover; border-radius: 8px; }
+
+        @media (max-width: 768px) { .nav-links, .auth-group { display: none; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-content">
+            <div class="logo" onclick="window.scrollTo(0,0)">NeonMarket.</div>
+            <nav class="nav-links">
+                <a href="#flash">Ofertas</a>
+                <a href="#phones">Móviles</a>
+                <a href="#laptops">Laptops</a>
+                <a href="#shoes">Zapatos</a>
+                <a href="#consoles">Gaming</a>
+            </nav>
+            <div class="auth-group">
+                <button class="btn-header-login" onclick="toggleModal('loginModal')">Log In</button>
+                <button class="btn-header-signup" onclick="toggleModal('signupModal')">Sign Up</button>
+                <button onclick="toggleCart()" style="background:none; border:none; color:white; font-size:1.3rem; position:relative; cursor:pointer; margin-left:10px;">
+                    <i class="fas fa-shopping-bag"></i>
+                    <span id="cart-count" style="position:absolute; top:-8px; right:-8px; background:var(--flash); font-size:0.7rem; padding:2px 6px; border-radius:50%;">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="modal-overlay" id="loginModal">
+        <div class="modal-content">
+            <i class="fas fa-times modal-close" onclick="toggleModal('loginModal')"></i>
+            <h2>Bienvenido</h2>
+            <p style="color:var(--text-muted); margin-bottom:25px;">Ingresa tus credenciales para continuar.</p>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" placeholder="tu@ejemplo.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" placeholder="••••••••">
+            </div>
+            <button class="btn-submit" onclick="alert('Iniciando sesión...')">INGRESAR</button>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="signupModal">
+        <div class="modal-content">
+            <i class="fas fa-times modal-close" onclick="toggleModal('signupModal')"></i>
+            <h2>Crear Cuenta</h2>
+            <p style="color:var(--text-muted); margin-bottom:25px;">Únete a la comunidad tecnológica más grande.</p>
+            <div class="form-group">
+                <label>Nombre Completo</label>
+                <input type="text" placeholder="Ej: Juan Pérez">
+            </div>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" placeholder="tu@ejemplo.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" placeholder="Crea una clave fuerte">
+            </div>
+            <button class="btn-submit" onclick="alert('Cuenta creada con éxito')">REGISTRARSE</button>
+        </div>
+    </div>
+
+    <section class="hero">
+        <div class="container">
+            <h1>El Futuro es <span>Neon</span></h1>
+            <p style="max-width:600px; margin:0 auto 30px; color:var(--text-muted);">Bienvenido a la edición definitiva. Descubre tecnología de punta y moda urbana con soporte de IA avanzada.</p>
+            <button class="btn-header-signup" style="padding:15px 40px; font-size:1.1rem;" onclick="document.getElementById('flash').scrollIntoView()">Ver Catálogo</button>
+        </div>
+    </section>
+
+    <div class="container">
+        <section id="flash">
+            <div class="section-header">
+                <h2 style="font-size:1.8rem;">Ofertas <span>Relámpago</span> ⚡</h2>
+                <div class="timer-box" id="timer">00:00:00</div>
+            </div>
+            <div class="grid" id="flash-container"></div>
+        </section>
+
+        <section id="phones"><div class="section-header"><h2>Celulares <span>Premium</span></h2></div><div class="grid" id="phones-container"></div></section>
+        <section id="laptops"><div class="section-header"><h2>Laptops <span>Gaming</span></h2></div><div class="grid" id="laptops-container"></div></section>
+        <section id="audio"><div class="section-header"><h2>Audio <span>Pro</span></h2></div><div class="grid" id="audio-container"></div></section>
+        <section id="shoes"><div class="section-header"><h2>Sneakers <span>Urban</span></h2></div><div class="grid" id="shoes-container"></div></section>
+        <section id="consoles" style="margin-bottom:100px;"><div class="section-header"><h2>Consolas</h2></div><div class="grid" id="consoles-container"></div></section>
+    </div>
+
+    <div class="ai-fab" onclick="toggleChat()"><i class="fas fa-sparkles"></i></div>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <div style="width:30px; height:30px; background:var(--gemini-grad); border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.8rem;"><i class="fas fa-sparkles"></i></div>
+            Neon Assistant
+            <i class="fas fa-times" onclick="toggleChat()" style="margin-left:auto; cursor:pointer;"></i>
+        </div>
+        <div class="chat-msgs" id="chatMsgs">
+            <div class="msg bot">¡Hola! Soy la IA de NeonMarket. Tengo acceso a los 20+ productos en stock. ¿En qué te ayudo?</div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Pregunta por un producto...">
+            <button onclick="sendMessage()" style="background:var(--primary); border:none; color:white; padding:10px; border-radius:50%; cursor:pointer;"><i class="fas fa-paper-plane"></i></button>
+        </div>
+    </div>
+
+    <div class="sidebar" id="cartSidebar">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+            <h2>Tu Carrito</h2>
+            <i class="fas fa-times" onclick="toggleCart()" style="cursor:pointer; font-size:1.4rem;"></i>
+        </div>
+        <div id="cartItems" style="height:70%; overflow-y:auto;"></div>
+        <div style="border-top:1px solid var(--border); padding-top:20px; margin-top:auto;">
+            <div style="display:flex; justify-content:space-between; font-size:1.3rem; font-weight:bold; margin-bottom:20px;">
+                <span>Total:</span><span id="cartTotal">$0.00</span>
+            </div>
+            <button class="btn-header-signup" style="width:100%; padding:15px; border-radius:12px;">PAGAR AHORA</button>
+        </div>
+    </div>
+
+    <script>
+        const productsDB = [
+            { id: 1, category: 'flash', name: "Laptop Razer Blade 16", price: 2199, oldPrice: 2800, img: "https://images.unsplash.com/photo-1603302576837-37561b2e2302?w=500" },
+            { id: 2, category: 'flash', name: "iPhone 15 Pro Max", price: 950, oldPrice: 1200, img: "https://images.unsplash.com/photo-1695048133142-1a20484d2569?w=500" },
+            { id: 3, category: 'flash', name: "AirPods Max", price: 420, oldPrice: 549, img: "https://images.unsplash.com/photo-1628202926206-c63a34b1618f?w=500" },
+            { id: 4, category: 'phones', name: "Samsung S24 Ultra", price: 1099, img: "https://owp.klarna.com/product/3037407366/Samsung-Galaxy-S24-Ultra-1TB.jpg" },
+            { id: 5, category: 'phones', name: "Pixel 8 Pro", price: 899, img: "https://m.media-amazon.com/images/I/71h9zq4viSL._AC_SL1500_.jpg" },
+            { id: 6, category: 'phones', name: "Nothing Phone (2)", price: 649, img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=500" },
+            { id: 7, category: 'laptops', name: "MacBook Air M3", price: 1099, img: "https://images.unsplash.com/photo-1611186871348-b1ce696e52c9?w=500" },
+            { id: 8, category: 'laptops', name: "Dell XPS 15", price: 1450, img: "https://images.unsplash.com/photo-1593642702821-c8da6771f0c6?w=500" },
+            { id: 9, category: 'audio', name: "Sony WH-1000XM5", price: 349, img: "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=500" },
+            { id: 10, category: 'audio', name: "Marshall Major IV", price: 149, img: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=500" },
+            { id: 11, category: 'shoes', name: "Jordan 1 Retro High", price: 190, img: "https://images.unsplash.com/photo-1552346154-21d32810aba3?w=500" },
+            { id: 12, category: 'shoes', name: "Nike Air Max 90", price: 130, img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500" },
+            { id: 13, category: 'consoles', name: "PS5 Pro Edition", price: 699, img: "https://tse1.mm.bing.net/th/id/OIP.u-mFn3r4_I7INM25H4MH5QHaEK?o=7rm=3&rs=1&pid=ImgDetMain&o=7&rm=3" },
+            { id: 14, category: 'consoles', name: "Xbox Series X", price: 499, img: "https://images.unsplash.com/photo-1621259182978-fbf93132d53d?w=500" }
+        ];
+
+        function render() {
+            productsDB.forEach(p => {
+                const container = document.getElementById(p.category + '-container');
+                if(!container) return;
+                const old = p.oldPrice ? `<span class="old-price">$${p.oldPrice}</span>` : '';
+                container.innerHTML += `
+                    <div class="card">
+                        <img src="${p.img}" class="card-img">
+                        <div class="card-body">
+                            <h3 style="font-size:1.1rem; font-weight:600;">${p.name}</h3>
+                            <div class="card-price">${old}$${p.price}</div>
+                            <button class="btn-add" onclick="addToCart(${p.id})">Añadir</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function toggleModal(id) {
+            const m = document.getElementById(id);
+            m.style.display = (m.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        let cart = [];
+        function addToCart(id) {
+            cart.push(productsDB.find(x => x.id === id));
+            updateCart();
+            document.getElementById('cartSidebar').classList.add('active');
+        }
+
+        function updateCart() {
+            const list = document.getElementById('cartItems');
+            list.innerHTML = '';
+            let total = 0;
+            cart.forEach((p, i) => {
+                total += p.price;
+                list.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${p.img}">
+                        <div style="flex:1"><div>${p.name}</div><b style="color:var(--secondary)">$${p.price}</b></div>
+                        <i class="fas fa-trash" onclick="cart.splice(${i},1);updateCart()" style="color:var(--flash); cursor:pointer;"></i>
+                    </div>`;
+            });
+            document.getElementById('cartTotal').innerText = '$' + total.toFixed(2);
+            document.getElementById('cart-count').innerText = cart.length;
+        }
+
+        function toggleCart() { document.getElementById('cartSidebar').classList.toggle('active'); }
+        function toggleChat() { 
+            const chat = document.getElementById('chatWindow');
+            chat.style.display = chat.style.display === 'flex' ? 'none' : 'flex'; 
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const val = input.value.toLowerCase();
+            if(!val) return;
+            const msgs = document.getElementById('chatMsgs');
+            msgs.innerHTML += `<div class="msg user">${input.value}</div>`;
+            
+            let res = "He analizado el catálogo. Tenemos iPhones, laptops Razer y consolas PS5 en stock. ¿Quieres ver algún precio?";
+            if(val.includes("zapato") || val.includes("jordan")) res = "Los Jordan 1 Retro High están a $190. ¡Son de los más vendidos!";
+            if(val.includes("iphone") || val.includes("oferta")) res = "¡El iPhone 15 Pro Max está rebajado a $950 en la sección Relámpago!";
+
+            setTimeout(() => {
+                msgs.innerHTML += `<div class="msg bot">${res}</div>`;
+                msgs.scrollTop = msgs.scrollHeight;
+            }, 600);
+            input.value = '';
+        }
+
+        render();
+        setInterval(() => {
+            const d = new Date();
+            document.getElementById('timer').innerText = `${23-d.getHours()}h ${59-d.getMinutes()}m ${59-d.getSeconds()}s`;
+        }, 1000);
+    </script>
+</body>
+</html>
